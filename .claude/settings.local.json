@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm -v)",
+      "Bash(npm create *)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(npm ping *)",
+      "Bash(npm view *)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(npm ls *)",
+      "Bash(sips -z 192 192 /Users/kyuyong/dev/jerryScore/score.jpg --out /Users/kyuyong/dev/jerryScore/public/icons/icon-192.png)",
+      "Bash(sips -z 512 512 /Users/kyuyong/dev/jerryScore/score.jpg --out /Users/kyuyong/dev/jerryScore/public/icons/icon-512.png)",
+      "Bash(sips -s format png -z 192 192 /Users/kyuyong/dev/jerryScore/score.jpg --out /Users/kyuyong/dev/jerryScore/public/icons/icon-192.png)",
+      "Bash(sips -s format png -z 512 512 /Users/kyuyong/dev/jerryScore/score.jpg --out /Users/kyuyong/dev/jerryScore/public/icons/icon-512.png)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(curl -sf http://localhost:5173/src/main.tsx)",
+      "Bash(curl -sf http://localhost:5173/src/App.tsx)",
+      "Bash(echo \"APP EXIT:$?\")",
+      "Bash(curl -sf http://localhost:5173/src/pages/ScoreListPage.tsx)",
+      "Bash(echo \"LIST EXIT:$?\")",
+      "Bash(curl -sf http://localhost:5173/src/pages/ViewerPage.tsx)",
+      "Bash(pkill -f \"vite$\")",
+      "Bash(lsof -ti:5173)",
+      "Bash(xargs kill)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
+      "Bash(gh auth *)",
+      "Bash(git config *)",
+      "Bash(GITHUB_PAGES=true VITE_GOOGLE_CLIENT_ID=\"559414474611-smgsv5pj1urgqovpdv6gpft4h36ehvao.apps.googleusercontent.com\" npm run build)"
+    ]
+  }
+}
