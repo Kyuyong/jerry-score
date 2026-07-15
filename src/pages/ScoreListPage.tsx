@@ -57,7 +57,11 @@ export default function ScoreListPage() {
   if (!isSignedIn) {
     return (
       <div className="flex h-screen flex-col items-center justify-center gap-4 bg-light px-6 text-center">
-        <img src="/score.jpg" alt="Jerry Score" className="h-24 w-24 rounded-2xl object-cover shadow" />
+        <img
+          src={`${import.meta.env.BASE_URL}score.jpg`}
+          alt="Jerry Score"
+          className="h-24 w-24 rounded-2xl object-cover shadow"
+        />
         <h1 className="text-xl font-semibold text-dark">Jerry Score</h1>
         <p className="text-sm text-dark/60">Google 계정으로 로그인해서 악보를 관리해보세요.</p>
         <button onClick={() => void signIn()} className="rounded-full bg-primary px-6 py-2 font-medium text-white shadow-sm">

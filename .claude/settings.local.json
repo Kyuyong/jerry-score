@@ -27,7 +27,10 @@
       "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173/)",
       "Bash(gh auth *)",
       "Bash(git config *)",
-      "Bash(GITHUB_PAGES=true VITE_GOOGLE_CLIENT_ID=\"559414474611-smgsv5pj1urgqovpdv6gpft4h36ehvao.apps.googleusercontent.com\" npm run build)"
+      "Bash(GITHUB_PAGES=true VITE_GOOGLE_CLIENT_ID=\"559414474611-smgsv5pj1urgqovpdv6gpft4h36ehvao.apps.googleusercontent.com\" npm run build)",
+      "Bash(grep -E '^\\\\.env$|node_modules|dist/')",
+      "Bash(echo \"exit:$?\")",
+      "Bash(grep -E '^score.jpg$|README')"
     ]
   }
 }
