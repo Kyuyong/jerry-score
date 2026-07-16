@@ -12,6 +12,8 @@ interface Props {
   penWidth: number
   drawingEnabled: boolean
   reloadToken: number
+  panEnabled?: boolean
+  onMeasured?: (pageNumber: number, width: number, height: number) => void
 }
 
 export default function PdfPage({
@@ -23,6 +25,8 @@ export default function PdfPage({
   penWidth,
   drawingEnabled,
   reloadToken,
+  panEnabled = true,
+  onMeasured,
 }: Props) {
   const pdfCanvasRef = useRef<HTMLCanvasElement>(null)
   const annCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -44,6 +48,7 @@ export default function PdfPage({
       canvas.width = viewport.width
       canvas.height = viewport.height
       setSize({ width: viewport.width, height: viewport.height })
+      onMeasured?.(pageNumber, viewport.width / renderScale, viewport.height / renderScale)
       renderTask = page.render({ canvas, viewport })
       await renderTask.promise
     })()
@@ -52,7 +57,7 @@ export default function PdfPage({
       cancelled = true
       renderTask?.cancel()
     }
-  }, [pdfDoc, pageNumber, renderScale])
+  }, [pdfDoc, pageNumber, renderScale, onMeasured])
 
   const redraw = useCallback(() => {
     const canvas = annCanvasRef.current
@@ -150,7 +155,7 @@ export default function PdfPage({
         className="absolute inset-0"
         style={{
           cursor: drawingEnabled ? 'crosshair' : 'default',
-          touchAction: drawingEnabled ? 'none' : 'pan-x pan-y pinch-zoom',
+          touchAction: drawingEnabled || !panEnabled ? 'none' : 'pan-x pan-y pinch-zoom',
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

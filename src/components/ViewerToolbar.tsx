@@ -4,6 +4,8 @@ interface Props {
   canPrev: boolean
   canNext: boolean
   scale: number
+  zoomLocked: boolean
+  canFitToScreen: boolean
   drawingEnabled: boolean
   isLandscape: boolean
   twoPageView: boolean
@@ -11,6 +13,7 @@ interface Props {
   onNext: () => void
   onZoomIn: () => void
   onZoomOut: () => void
+  onFitToScreen: () => void
   onToggleDraw: () => void
   onClearPage: () => void
   onToggleThumbs: () => void
@@ -23,6 +26,8 @@ export default function ViewerToolbar({
   canPrev,
   canNext,
   scale,
+  zoomLocked,
+  canFitToScreen,
   drawingEnabled,
   isLandscape,
   twoPageView,
@@ -30,6 +35,7 @@ export default function ViewerToolbar({
   onNext,
   onZoomIn,
   onZoomOut,
+  onFitToScreen,
   onToggleDraw,
   onClearPage,
   onToggleThumbs,
@@ -65,7 +71,8 @@ export default function ViewerToolbar({
       <div className="flex items-center gap-1">
         <button
           onClick={onZoomOut}
-          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10"
+          disabled={zoomLocked}
+          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-30"
           aria-label="축소"
         >
           －
@@ -73,11 +80,24 @@ export default function ViewerToolbar({
         <span className="w-12 text-center text-xs">{Math.round(scale * 100)}%</span>
         <button
           onClick={onZoomIn}
-          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10"
+          disabled={zoomLocked}
+          className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-30"
           aria-label="확대"
         >
           ＋
         </button>
+        {!zoomLocked && (
+          <button
+            onClick={onFitToScreen}
+            disabled={!canFitToScreen}
+            className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10 disabled:opacity-30"
+            aria-label="화면에 맞추기"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 3H4v4M16 3h4v4M8 21H4v-4M16 21h4v-4" />
+            </svg>
+          </button>
+        )}
       </div>
       <div className="flex items-center gap-1">
         {isLandscape && (

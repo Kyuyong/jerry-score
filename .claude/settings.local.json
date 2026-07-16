@@ -31,7 +31,9 @@
       "Bash(grep -E '^\\\\.env$|node_modules|dist/')",
       "Bash(echo \"exit:$?\")",
       "Bash(grep -E '^score.jpg$|README')",
-      "Bash(lsof -ti:5173,5174)"
+      "Bash(lsof -ti:5173,5174)",
+      "Bash(git stash *)",
+      "Bash(xargs -r kill)"
     ]
   }
 }
