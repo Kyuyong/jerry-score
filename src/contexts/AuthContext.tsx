@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import {
   initGoogleAuth,
   requestAccessToken,
+  requestAccessTokenSilent,
   hasStoredToken,
   wasPreviouslyAuthorized,
   signOut as googleSignOut,
@@ -29,8 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setIsSignedIn(true)
         } else if (wasPreviouslyAuthorized()) {
           // 이전에 로그인했었지만 토큰이 만료된 상태 — 사용자 상호작용 없이 조용히 재발급 시도
+          // (타임아웃이 있어 iOS Safari의 서드파티 쿠키 제한으로 콜백이 오지 않아도 멈추지 않아요)
           try {
-            await requestAccessToken('none')
+            await requestAccessTokenSilent()
             setIsSignedIn(true)
           } catch {
             setIsSignedIn(false)

@@ -3,6 +3,24 @@ const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const SCOPES = 'https://www.googleapis.com/auth/drive.file'
 const TOKEN_STORAGE_KEY = 'jerry_score_token'
 const AUTHORIZED_FLAG_KEY = 'jerry_score_authorized'
+const SILENT_AUTH_TIMEOUT_MS = 8000
+const SCRIPT_LOAD_TIMEOUT_MS = 10000
+
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(message)), ms)
+    promise.then(
+      (value) => {
+        clearTimeout(timer)
+        resolve(value)
+      },
+      (err: unknown) => {
+        clearTimeout(timer)
+        reject(err instanceof Error ? err : new Error(String(err)))
+      },
+    )
+  })
+}
 
 type PromptMode = '' | 'none' | 'consent'
 
@@ -60,7 +78,7 @@ export async function initGoogleAuth(): Promise<void> {
   if (!CLIENT_ID) {
     throw new Error('VITE_GOOGLE_CLIENT_ID가 설정되지 않았어요. .env 파일을 확인해주세요.')
   }
-  await loadGisScript()
+  await withTimeout(loadGisScript(), SCRIPT_LOAD_TIMEOUT_MS, 'Google 인증 스크립트 로딩이 시간 초과됐어요.')
 }
 
 export function hasStoredToken(): boolean {
@@ -104,11 +122,20 @@ export function requestAccessToken(prompt: PromptMode = ''): Promise<string> {
   })
 }
 
+/**
+ * 사용자 상호작용 없이 조용히 재인증을 시도해요. iOS Safari(특히 홈 화면 PWA)에서는
+ * 서드파티 쿠키 제한 때문에 prompt:'none' 콜백이 아예 응답하지 않을 수 있어
+ * 타임아웃을 걸어 무한 대기를 방지해요.
+ */
+export function requestAccessTokenSilent(): Promise<string> {
+  return withTimeout(requestAccessToken('none'), SILENT_AUTH_TIMEOUT_MS, '조용한 재인증이 시간 초과됐어요.')
+}
+
 /** 캐시된 토큰이 없거나 만료됐을 때 사용자 상호작용 없이 조용히 재인증을 시도해요. */
 export async function getAccessToken(): Promise<string> {
   const stored = readStoredToken()
   if (stored) return stored.accessToken
-  return requestAccessToken('none')
+  return requestAccessTokenSilent()
 }
 
 export function signOut(): void {
