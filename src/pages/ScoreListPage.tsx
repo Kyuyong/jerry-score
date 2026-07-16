@@ -7,6 +7,7 @@ import ScoreGrid from '../components/ScoreGrid'
 import UploadButton from '../components/UploadButton'
 import EditScoreDialog from '../components/EditScoreDialog'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog'
+import VersionBadge from '../components/VersionBadge'
 import { useAuth } from '../contexts/AuthContext'
 import { useScores } from '../hooks/useScores'
 import { allTags } from '../lib/scoreStore'
@@ -66,7 +67,10 @@ export default function ScoreListPage() {
           alt="Jerry Score"
           className="h-24 w-24 rounded-2xl object-cover shadow"
         />
-        <h1 className="font-serif text-xl font-semibold text-dark">Jerry Score</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="font-serif text-xl font-semibold text-dark">Jerry Score</h1>
+          <VersionBadge />
+        </div>
         <p className="text-sm text-dark/60">Google 계정으로 로그인해서 악보를 관리해보세요.</p>
         <button onClick={() => void signIn()} className="rounded-full bg-primary px-6 py-2 font-medium text-white shadow-sm">
           Google 계정으로 로그인
@@ -80,6 +84,7 @@ export default function ScoreListPage() {
       <Header
         title="Jerry Score"
         subtitle="PDF 악보 보관함"
+        titleBadge={<VersionBadge />}
         right={
           <>
             <UploadButton onUploaded={() => void sync()} />

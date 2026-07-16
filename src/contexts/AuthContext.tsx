@@ -1,5 +1,11 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { initGoogleAuth, requestAccessToken, hasStoredToken, signOut as googleSignOut } from '../lib/googleAuth'
+import {
+  initGoogleAuth,
+  requestAccessToken,
+  hasStoredToken,
+  wasPreviouslyAuthorized,
+  signOut as googleSignOut,
+} from '../lib/googleAuth'
 
 interface AuthContextValue {
   isReady: boolean
@@ -18,8 +24,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     initGoogleAuth()
-      .then(() => {
-        setIsSignedIn(hasStoredToken())
+      .then(async () => {
+        if (hasStoredToken()) {
+          setIsSignedIn(true)
+        } else if (wasPreviouslyAuthorized()) {
+          // 이전에 로그인했었지만 토큰이 만료된 상태 — 사용자 상호작용 없이 조용히 재발급 시도
+          try {
+            await requestAccessToken('none')
+            setIsSignedIn(true)
+          } catch {
+            setIsSignedIn(false)
+          }
+        }
         setIsReady(true)
       })
       .catch((err: unknown) => {
@@ -29,7 +45,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const signIn = async () => {
-    await requestAccessToken(true)
+    await requestAccessToken('consent')
     setIsSignedIn(true)
   }
 

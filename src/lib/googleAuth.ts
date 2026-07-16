@@ -2,6 +2,9 @@ const GIS_SRC = 'https://accounts.google.com/gsi/client'
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined
 const SCOPES = 'https://www.googleapis.com/auth/drive.file'
 const TOKEN_STORAGE_KEY = 'jerry_score_token'
+const AUTHORIZED_FLAG_KEY = 'jerry_score_authorized'
+
+type PromptMode = '' | 'none' | 'consent'
 
 interface StoredToken {
   accessToken: string
@@ -31,8 +34,8 @@ function loadGisScript(): Promise<void> {
 }
 
 function readStoredToken(): StoredToken | undefined {
-  if (inMemoryToken) return inMemoryToken
-  const raw = sessionStorage.getItem(TOKEN_STORAGE_KEY)
+  if (inMemoryToken && inMemoryToken.expiresAt > Date.now()) return inMemoryToken
+  const raw = localStorage.getItem(TOKEN_STORAGE_KEY)
   if (!raw) return undefined
   try {
     const parsed = JSON.parse(raw) as StoredToken
@@ -43,13 +46,14 @@ function readStoredToken(): StoredToken | undefined {
   } catch {
     // ignore malformed cache
   }
-  sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+  localStorage.removeItem(TOKEN_STORAGE_KEY)
   return undefined
 }
 
-function writeStoredToken(token: StoredToken) {
+function writeStoredToken(token: StoredToken): void {
   inMemoryToken = token
-  sessionStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(token))
+  localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(token))
+  localStorage.setItem(AUTHORIZED_FLAG_KEY, '1')
 }
 
 export async function initGoogleAuth(): Promise<void> {
@@ -63,7 +67,11 @@ export function hasStoredToken(): boolean {
   return Boolean(readStoredToken())
 }
 
-export function requestAccessToken(promptConsent = false): Promise<string> {
+export function wasPreviouslyAuthorized(): boolean {
+  return localStorage.getItem(AUTHORIZED_FLAG_KEY) === '1'
+}
+
+export function requestAccessToken(prompt: PromptMode = ''): Promise<string> {
   return new Promise((resolve, reject) => {
     if (!window.google) {
       reject(new Error('Google Identity Services가 아직 로드되지 않았어요.'))
@@ -92,14 +100,15 @@ export function requestAccessToken(promptConsent = false): Promise<string> {
       writeStoredToken(token)
       resolve(token.accessToken)
     }
-    tokenClient.requestAccessToken({ prompt: promptConsent ? 'consent' : '' })
+    tokenClient.requestAccessToken({ prompt })
   })
 }
 
+/** 캐시된 토큰이 없거나 만료됐을 때 사용자 상호작용 없이 조용히 재인증을 시도해요. */
 export async function getAccessToken(): Promise<string> {
   const stored = readStoredToken()
   if (stored) return stored.accessToken
-  return requestAccessToken()
+  return requestAccessToken('none')
 }
 
 export function signOut(): void {
@@ -108,5 +117,6 @@ export function signOut(): void {
     window.google.accounts.oauth2.revoke(stored.accessToken, () => {})
   }
   inMemoryToken = undefined
-  sessionStorage.removeItem(TOKEN_STORAGE_KEY)
+  localStorage.removeItem(TOKEN_STORAGE_KEY)
+  localStorage.removeItem(AUTHORIZED_FLAG_KEY)
 }

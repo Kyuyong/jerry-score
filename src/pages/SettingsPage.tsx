@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import Header from '../components/Header'
 import { useAuth } from '../contexts/AuthContext'
 import { getStorageQuota } from '../lib/googleDrive'
+import { APP_VERSION } from '../version'
 
 function formatBytes(bytes: number): string {
   if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
@@ -70,7 +71,7 @@ export default function SettingsPage() {
 
         <section className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-dark/5">
           <h2 className="mb-2 text-sm font-semibold text-dark/70">앱 정보</h2>
-          <p className="text-sm text-dark/60">Jerry Score v1.0.0</p>
+          <p className="text-sm text-dark/60">Jerry Score v{APP_VERSION}</p>
           <p className="text-sm text-dark/60">개인용 PDF 악보 뷰어 PWA</p>
         </section>
       </main>

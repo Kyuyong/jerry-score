@@ -4,13 +4,17 @@ import { Link } from 'react-router-dom'
 interface Props {
   title: string
   subtitle?: string
+  titleBadge?: ReactNode
   right?: ReactNode
   back?: boolean
 }
 
-export default function Header({ title, subtitle, right, back }: Props) {
+export default function Header({ title, subtitle, titleBadge, right, back }: Props) {
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between bg-primary px-4 py-3 text-white shadow-sm">
+    <header
+      className="sticky top-0 z-10 flex items-center justify-between bg-primary px-4 py-3 text-white shadow-sm"
+      style={{ paddingTop: 'calc(0.75rem + env(safe-area-inset-top))' }}
+    >
       <div className="flex min-w-0 items-center gap-2">
         {back && (
           <Link
@@ -24,7 +28,10 @@ export default function Header({ title, subtitle, right, back }: Props) {
           </Link>
         )}
         <div className="min-w-0">
-          <h1 className="truncate font-serif text-lg font-semibold leading-tight">{title}</h1>
+          <div className="flex items-center gap-1.5">
+            <h1 className="truncate font-serif text-lg font-semibold leading-tight">{title}</h1>
+            {titleBadge}
+          </div>
           {subtitle && (
             <div className="truncate text-[10px] uppercase tracking-widest text-white/70">{subtitle}</div>
           )}
