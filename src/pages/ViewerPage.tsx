@@ -16,12 +16,10 @@ const RENDER_SCALE = 2.4
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value))
 
-function getSpread(page: number, numPages: number, isLandscape: boolean): number[] {
+function getSpread(page: number, numPages: number, twoPageView: boolean): number[] {
   if (numPages <= 0) return []
-  if (isLandscape && numPages > 1) {
-    if (page === 1) return [1]
-    const base = page % 2 === 0 ? page : page - 1
-    return [base, base + 1].filter((n) => n <= numPages)
+  if (twoPageView) {
+    return [page, page + 1].filter((n) => n <= numPages)
   }
   return [Math.min(page, numPages)]
 }
@@ -32,18 +30,22 @@ export default function ViewerPage() {
   const { pdfDoc, loading, error } = usePdfDocument(scoreId)
   const [page, setPage] = useState(1)
   const [scale, setScale] = useState(1.2)
-  const [drawingEnabled, setDrawingEnabled] = useState(true)
+  const [drawingEnabled, setDrawingEnabled] = useState(false)
   const [showThumbs, setShowThumbs] = useState(false)
   const [reloadToken, setReloadToken] = useState(0)
   const [isLandscape, setIsLandscape] = useState(
     () => window.matchMedia('(orientation: landscape)').matches,
   )
+  const [twoPageView, setTwoPageView] = useState(false)
   const touchStartX = useRef<number | null>(null)
   const pinchRef = useRef<{ dist: number; scale: number } | null>(null)
 
   const score = useMemo(() => getScores().find((s) => s.id === scoreId), [scoreId])
   const numPages = pdfDoc?.numPages ?? 0
-  const spread = useMemo(() => getSpread(page, numPages, isLandscape), [page, numPages, isLandscape])
+  const spread = useMemo(
+    () => getSpread(page, numPages, twoPageView && isLandscape),
+    [page, numPages, twoPageView, isLandscape],
+  )
 
   useEffect(() => {
     setPage(1)
@@ -64,16 +66,14 @@ export default function ViewerPage() {
     return () => mq.removeEventListener('change', handler)
   }, [])
 
+  useEffect(() => {
+    if (!isLandscape) setTwoPageView(false)
+  }, [isLandscape])
+
   if (!scoreId) return null
 
-  const goPrev = () => {
-    const first = spread[0] ?? 1
-    setPage(Math.max(1, first - 1))
-  }
-  const goNext = () => {
-    const last = spread[spread.length - 1] ?? 1
-    setPage(Math.min(numPages, last + 1))
-  }
+  const goPrev = () => setPage((p) => Math.max(1, p - 1))
+  const goNext = () => setPage((p) => Math.min(numPages, p + 1))
 
   const handleTouchStart = (e: TouchEvent<HTMLDivElement>) => {
     if (e.touches.length === 2) {
@@ -129,6 +129,8 @@ export default function ViewerPage() {
         canNext={spread.length ? spread[spread.length - 1] < numPages : false}
         scale={scale}
         drawingEnabled={drawingEnabled}
+        isLandscape={isLandscape}
+        twoPageView={twoPageView}
         onPrev={goPrev}
         onNext={goNext}
         onZoomIn={() => setScale((s) => clamp(+(s + 0.2).toFixed(2), MIN_SCALE, MAX_SCALE))}
@@ -136,6 +138,7 @@ export default function ViewerPage() {
         onToggleDraw={() => setDrawingEnabled((d) => !d)}
         onClearPage={handleClear}
         onToggleThumbs={() => setShowThumbs((v) => !v)}
+        onToggleTwoPage={() => setTwoPageView((v) => !v)}
       />
       <div
         className="flex-1 overflow-auto p-4"

@@ -5,6 +5,8 @@ interface Props {
   canNext: boolean
   scale: number
   drawingEnabled: boolean
+  isLandscape: boolean
+  twoPageView: boolean
   onPrev: () => void
   onNext: () => void
   onZoomIn: () => void
@@ -12,6 +14,7 @@ interface Props {
   onToggleDraw: () => void
   onClearPage: () => void
   onToggleThumbs: () => void
+  onToggleTwoPage: () => void
 }
 
 export default function ViewerToolbar({
@@ -21,6 +24,8 @@ export default function ViewerToolbar({
   canNext,
   scale,
   drawingEnabled,
+  isLandscape,
+  twoPageView,
   onPrev,
   onNext,
   onZoomIn,
@@ -28,6 +33,7 @@ export default function ViewerToolbar({
   onToggleDraw,
   onClearPage,
   onToggleThumbs,
+  onToggleTwoPage,
 }: Props) {
   return (
     <div className="flex items-center justify-between gap-2 bg-[#0c6a5b] px-3 py-2 text-white">
@@ -74,6 +80,20 @@ export default function ViewerToolbar({
         </button>
       </div>
       <div className="flex items-center gap-1">
+        {isLandscape && (
+          <button
+            onClick={onToggleTwoPage}
+            className={`flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10 ${
+              twoPageView ? 'bg-accent text-dark' : ''
+            }`}
+            aria-label="2페이지 보기 전환"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+              <rect x="3" y="4" width="8" height="16" rx="1" />
+              <rect x="13" y="4" width="8" height="16" rx="1" />
+            </svg>
+          </button>
+        )}
         <button
           onClick={onToggleThumbs}
           className="flex h-7 w-7 items-center justify-center rounded-full hover:bg-white/10"

@@ -28,6 +28,7 @@ export default function PdfPage({
   const annCanvasRef = useRef<HTMLCanvasElement>(null)
   const strokesRef = useRef<Stroke[]>([])
   const currentStrokeRef = useRef<Stroke | null>(null)
+  const activeTouchPointers = useRef<Set<number>>(new Set())
   const [size, setSize] = useState({ width: 0, height: 0 })
 
   useEffect(() => {
@@ -101,11 +102,21 @@ export default function PdfPage({
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawingEnabled) return
+    if (e.pointerType === 'touch') {
+      activeTouchPointers.current.add(e.pointerId)
+      if (activeTouchPointers.current.size > 1) {
+        // 멀티터치(핀치 줌 등) — 진행 중이던 스트로크가 있다면 취소하고 그리기를 무시해요.
+        currentStrokeRef.current = null
+        redraw()
+        return
+      }
+    }
     e.currentTarget.setPointerCapture(e.pointerId)
     currentStrokeRef.current = { points: [getPoint(e)], color: penColor, width: penWidth * renderScale }
   }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === 'touch' && activeTouchPointers.current.size > 1) return
     const stroke = currentStrokeRef.current
     if (!stroke) return
     stroke.points.push(getPoint(e))
@@ -122,7 +133,8 @@ export default function PdfPage({
     ctx.stroke()
   }
 
-  const finishStroke = () => {
+  const finishStroke = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === 'touch') activeTouchPointers.current.delete(e.pointerId)
     const stroke = currentStrokeRef.current
     currentStrokeRef.current = null
     if (!stroke || stroke.points.length < 2) return
