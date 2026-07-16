@@ -25,7 +25,7 @@ export default function EditScoreDialog({ score, onSave, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-dark/40 p-4" onClick={onClose}>
       <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-lg" onClick={stop}>
-        <h2 className="mb-4 text-lg font-semibold text-dark">악보 정보 편집</h2>
+        <h2 className="mb-4 font-serif text-lg font-semibold text-dark">악보 정보 편집</h2>
         <label className="mb-1 block text-sm text-dark/70">제목</label>
         <input
           value={title}

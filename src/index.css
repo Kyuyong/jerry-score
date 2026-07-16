@@ -5,6 +5,8 @@
   --color-accent: #f2c265;
   --color-dark: #4a4a4a;
   --color-light: #f2f1ea;
+  --font-serif: 'Newsreader', ui-serif, Georgia, serif;
+  --font-sans: 'Work Sans', ui-sans-serif, system-ui, sans-serif;
 }
 
 html,
@@ -18,4 +20,5 @@ body {
   color: var(--color-dark);
   overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
+  font-family: var(--font-sans);
 }

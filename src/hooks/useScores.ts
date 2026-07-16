@@ -29,6 +29,7 @@ export function useScores() {
           addedAt: prev?.addedAt ?? (Date.parse(file.createdTime ?? '') || Date.now()),
           mimeType: file.mimeType,
           size: file.size,
+          pageCount: prev?.pageCount,
         })
       }
       for (const score of existing) {

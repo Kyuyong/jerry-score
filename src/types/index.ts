@@ -5,6 +5,7 @@ export interface ScoreMeta {
   addedAt: number
   mimeType: string
   size?: string
+  pageCount?: number
 }
 
 export interface StrokePoint {

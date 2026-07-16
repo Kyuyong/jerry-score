@@ -40,6 +40,14 @@ export function updateScoreMeta(id: string, patch: Partial<Pick<ScoreMeta, 'titl
   saveScores(scores)
 }
 
+export function updateScorePageCount(id: string, pageCount: number): void {
+  const scores = getScores()
+  const idx = scores.findIndex((s) => s.id === id)
+  if (idx < 0 || scores[idx].pageCount === pageCount) return
+  scores[idx] = { ...scores[idx], pageCount }
+  saveScores(scores)
+}
+
 export function allTags(): string[] {
   const set = new Set<string>()
   for (const score of getScores()) {

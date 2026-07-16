@@ -6,23 +6,23 @@ import type { Stroke, StrokePoint } from '../types'
 interface Props {
   pdfDoc: PDFDocumentProxy
   pageNumber: number
-  scale: number
+  renderScale: number
   scoreId: string
   penColor: string
   penWidth: number
   drawingEnabled: boolean
-  clearSignal: number
+  reloadToken: number
 }
 
 export default function PdfPage({
   pdfDoc,
   pageNumber,
-  scale,
+  renderScale,
   scoreId,
   penColor,
   penWidth,
   drawingEnabled,
-  clearSignal,
+  reloadToken,
 }: Props) {
   const pdfCanvasRef = useRef<HTMLCanvasElement>(null)
   const annCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -37,7 +37,7 @@ export default function PdfPage({
     void (async () => {
       const page = await pdfDoc.getPage(pageNumber)
       if (cancelled) return
-      const viewport = page.getViewport({ scale })
+      const viewport = page.getViewport({ scale: renderScale })
       const canvas = pdfCanvasRef.current
       if (!canvas) return
       canvas.width = viewport.width
@@ -51,7 +51,7 @@ export default function PdfPage({
       cancelled = true
       renderTask?.cancel()
     }
-  }, [pdfDoc, pageNumber, scale])
+  }, [pdfDoc, pageNumber, renderScale])
 
   const redraw = useCallback(() => {
     const canvas = annCanvasRef.current
@@ -82,7 +82,7 @@ export default function PdfPage({
     return () => {
       cancelled = true
     }
-  }, [scoreId, pageNumber, redraw])
+  }, [scoreId, pageNumber, redraw, reloadToken])
 
   useEffect(() => {
     const canvas = annCanvasRef.current
@@ -92,24 +92,17 @@ export default function PdfPage({
     redraw()
   }, [size, redraw])
 
-  const clearSignalRef = useRef(clearSignal)
-  useEffect(() => {
-    if (clearSignal === clearSignalRef.current) return
-    clearSignalRef.current = clearSignal
-    strokesRef.current = []
-    redraw()
-    void savePageStrokes(scoreId, pageNumber, [])
-  }, [clearSignal, scoreId, pageNumber, redraw])
-
   const getPoint = (e: React.PointerEvent<HTMLCanvasElement>): StrokePoint => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    const canvas = e.currentTarget
+    const rect = canvas.getBoundingClientRect()
+    const ratio = rect.width ? canvas.width / rect.width : 1
+    return { x: (e.clientX - rect.left) * ratio, y: (e.clientY - rect.top) * ratio }
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
     if (!drawingEnabled) return
     e.currentTarget.setPointerCapture(e.pointerId)
-    currentStrokeRef.current = { points: [getPoint(e)], color: penColor, width: penWidth }
+    currentStrokeRef.current = { points: [getPoint(e)], color: penColor, width: penWidth * renderScale }
   }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
@@ -138,7 +131,7 @@ export default function PdfPage({
   }
 
   return (
-    <div className="relative mx-auto" style={{ width: size.width || undefined, height: size.height || undefined }}>
+    <div className="relative shrink-0" style={{ width: size.width || undefined, height: size.height || undefined }}>
       <canvas ref={pdfCanvasRef} className="block rounded-lg bg-white shadow" />
       <canvas
         ref={annCanvasRef}

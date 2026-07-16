@@ -44,9 +44,14 @@ export default function UploadButton({ onUploaded }: Props) {
       <button
         onClick={() => inputRef.current?.click()}
         disabled={progress !== null}
-        className="flex items-center gap-1 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-white/25 disabled:opacity-60"
+        className="flex items-center gap-1.5 rounded-full bg-white/15 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-white/25 disabled:opacity-60"
       >
-        {progress !== null ? `업로드 중... ${progress}%` : '+ PDF 업로드'}
+        {progress === null && (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2}>
+            <path strokeLinecap="round" d="M12 5v14M5 12h14" />
+          </svg>
+        )}
+        {progress !== null ? `업로드 중... ${progress}%` : 'PDF 업로드'}
       </button>
     </>
   )

@@ -6,6 +6,7 @@ import TagFilter from '../components/TagFilter'
 import ScoreGrid from '../components/ScoreGrid'
 import UploadButton from '../components/UploadButton'
 import EditScoreDialog from '../components/EditScoreDialog'
+import DeleteConfirmDialog from '../components/DeleteConfirmDialog'
 import { useAuth } from '../contexts/AuthContext'
 import { useScores } from '../hooks/useScores'
 import { allTags } from '../lib/scoreStore'
@@ -17,6 +18,7 @@ export default function ScoreListPage() {
   const [query, setQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [editing, setEditing] = useState<ScoreMeta | null>(null)
+  const [deleting, setDeleting] = useState<ScoreMeta | null>(null)
 
   const tags = useMemo(() => allTags(), [scores])
 
@@ -32,12 +34,14 @@ export default function ScoreListPage() {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
   }
 
-  const handleDelete = async (score: ScoreMeta) => {
-    if (!confirm(`"${score.title}"을(를) 삭제할까요? Google Drive 원본도 함께 삭제돼요.`)) return
+  const handleConfirmDelete = async () => {
+    if (!deleting) return
     try {
-      await remove(score.id)
+      await remove(deleting.id)
     } catch (err) {
       alert(err instanceof Error ? err.message : '삭제에 실패했어요.')
+    } finally {
+      setDeleting(null)
     }
   }
 
@@ -62,7 +66,7 @@ export default function ScoreListPage() {
           alt="Jerry Score"
           className="h-24 w-24 rounded-2xl object-cover shadow"
         />
-        <h1 className="text-xl font-semibold text-dark">Jerry Score</h1>
+        <h1 className="font-serif text-xl font-semibold text-dark">Jerry Score</h1>
         <p className="text-sm text-dark/60">Google 계정으로 로그인해서 악보를 관리해보세요.</p>
         <button onClick={() => void signIn()} className="rounded-full bg-primary px-6 py-2 font-medium text-white shadow-sm">
           Google 계정으로 로그인
@@ -75,11 +79,22 @@ export default function ScoreListPage() {
     <div className="min-h-screen bg-light pb-8">
       <Header
         title="Jerry Score"
+        subtitle="PDF 악보 보관함"
         right={
           <>
             <UploadButton onUploaded={() => void sync()} />
-            <Link to="/settings" className="rounded-full p-2 hover:bg-white/10" aria-label="설정">
-              ⚙️
+            <Link
+              to="/settings"
+              className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
+              aria-label="설정"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8}>
+                <circle cx="12" cy="12" r="3" />
+                <path
+                  strokeLinecap="round"
+                  d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+                />
+              </svg>
             </Link>
           </>
         }
@@ -91,7 +106,7 @@ export default function ScoreListPage() {
         </div>
         {loading && <p className="mb-2 text-sm text-dark/50">Drive와 동기화 중...</p>}
         {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-        <ScoreGrid scores={filtered} onEdit={setEditing} onDelete={(s) => void handleDelete(s)} />
+        <ScoreGrid scores={filtered} onEdit={setEditing} onDelete={setDeleting} />
       </main>
       {editing && (
         <EditScoreDialog
@@ -101,6 +116,13 @@ export default function ScoreListPage() {
             updateMeta(editing.id, patch)
             setEditing(null)
           }}
+        />
+      )}
+      {deleting && (
+        <DeleteConfirmDialog
+          score={deleting}
+          onCancel={() => setDeleting(null)}
+          onConfirm={() => void handleConfirmDelete()}
         />
       )}
     </div>

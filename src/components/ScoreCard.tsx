@@ -12,15 +12,16 @@ export default function ScoreCard({ score, onEdit, onDelete }: Props) {
     <div className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-dark/5">
       <Link
         to={`/viewer/${score.id}`}
-        className="flex aspect-[3/4] flex-1 flex-col items-center justify-center gap-2 bg-light p-6"
+        className="relative flex aspect-[3/4] flex-1 flex-col items-center justify-center gap-2 p-6"
+        style={{
+          background:
+            'repeating-linear-gradient(#F2F1EA 0px, #F2F1EA 8px, rgba(74,74,74,0.10) 9px, rgba(74,74,74,0.10) 10px, #F2F1EA 11px)',
+        }}
       >
-        <svg className="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M9 17V5l10-2v12M9 17a3 3 0 11-6 0 3 3 0 016 0zm10-2a3 3 0 11-6 0 3 3 0 016 0z"
-          />
-        </svg>
+        <span className="absolute left-2.5 top-2 text-[8px] uppercase tracking-widest text-dark/35">
+          PDF{score.pageCount ? ` · ${score.pageCount}p` : ''}
+        </span>
+        <span className="font-serif text-3xl italic text-primary/55">♪</span>
         <span className="line-clamp-2 text-center text-sm font-medium text-dark">{score.title}</span>
       </Link>
       {score.tags.length > 0 && (

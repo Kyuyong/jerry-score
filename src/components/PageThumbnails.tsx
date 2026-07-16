@@ -3,11 +3,11 @@ import type { PDFDocumentProxy } from 'pdfjs-dist'
 
 interface Props {
   pdfDoc: PDFDocumentProxy
-  currentPage: number
+  activePages: number[]
   onSelect: (page: number) => void
 }
 
-export default function PageThumbnails({ pdfDoc, currentPage, onSelect }: Props) {
+export default function PageThumbnails({ pdfDoc, activePages, onSelect }: Props) {
   const [thumbs, setThumbs] = useState<string[]>([])
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export default function PageThumbnails({ pdfDoc, currentPage, onSelect }: Props)
           key={idx}
           onClick={() => onSelect(idx + 1)}
           className={`shrink-0 overflow-hidden rounded border-2 ${
-            currentPage === idx + 1 ? 'border-primary' : 'border-transparent'
+            activePages.includes(idx + 1) ? 'border-primary' : 'border-transparent'
           }`}
         >
           <img src={src} alt={`페이지 ${idx + 1}`} className="h-16 w-auto" />
