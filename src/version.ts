@@ -1,4 +1,4 @@
 /**
  * 앱 표시용 버전. 수정할 때마다 0.01씩 올려요 (1.00 -> 1.01 -> 1.02 ...).
  */
-export const APP_VERSION = '1.05'
+export const APP_VERSION = '1.07'

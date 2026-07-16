@@ -1,9 +1,10 @@
-import { getAccessToken } from './googleAuth'
+import { getAccessToken, invalidateToken } from './googleAuth'
 
 const API_BASE = 'https://www.googleapis.com/drive/v3'
 const UPLOAD_BASE = 'https://www.googleapis.com/upload/drive/v3'
 const APP_FOLDER_NAME = 'Jerry Score'
 const FOLDER_ID_CACHE_KEY = 'jerry_score_folder_id'
+const REQUEST_TIMEOUT_MS = 20000
 
 export interface DriveFile {
   id: string
@@ -18,12 +19,32 @@ async function authHeaders(): Promise<HeadersInit> {
   return { Authorization: `Bearer ${token}` }
 }
 
-async function driveFetch(path: string, init?: RequestInit): Promise<Response> {
+async function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (err) {
+    if (controller.signal.aborted) {
+      throw new Error('요청이 시간 초과됐어요. 네트워크 상태를 확인해주세요.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function driveFetch(path: string, init?: RequestInit, retried = false): Promise<Response> {
   const headers = await authHeaders()
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetchWithTimeout(`${API_BASE}${path}`, {
     ...init,
     headers: { ...headers, ...(init?.headers ?? {}) },
   })
+  if (res.status === 401 && !retried) {
+    // 저장된 토큰이 만료/무효 처리된 것 — 조용히 재발급받아 한 번만 재시도해요.
+    invalidateToken()
+    return driveFetch(path, init, true)
+  }
   if (!res.ok) {
     throw new Error(`Google Drive 요청 실패 (${res.status})`)
   }

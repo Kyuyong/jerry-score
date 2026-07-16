@@ -220,9 +220,7 @@ export default function ViewerPage() {
       />
       <div
         ref={containerRef}
-        className={`flex-1 p-4 ${
-          isSpreadMode ? 'flex touch-none items-center justify-center overflow-hidden' : 'overflow-auto'
-        }`}
+        className="flex flex-1 touch-none items-center justify-center overflow-hidden p-4"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -233,17 +231,14 @@ export default function ViewerPage() {
         {pdfDoc && (
           <div
             style={
-              isSpreadMode && spreadMetrics
+              spreadMetrics
                 ? { width: spreadMetrics.totalWidth * scale, height: spreadMetrics.maxHeight * scale }
-                : { margin: '0 auto', width: 'fit-content' }
+                : undefined
             }
           >
             <div
               className="flex w-fit gap-3.5"
-              style={{
-                transform: `scale(${scale / RENDER_SCALE})`,
-                transformOrigin: isSpreadMode ? 'top left' : 'top center',
-              }}
+              style={{ transform: `scale(${scale / RENDER_SCALE})`, transformOrigin: 'top left' }}
             >
               {spread.map((pageNum) => (
                 <PdfPage
@@ -256,7 +251,6 @@ export default function ViewerPage() {
                   penWidth={2.5}
                   drawingEnabled={drawingEnabled}
                   reloadToken={reloadToken}
-                  panEnabled={!isSpreadMode}
                   onMeasured={handlePageMeasured}
                 />
               ))}

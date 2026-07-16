@@ -12,7 +12,6 @@ interface Props {
   penWidth: number
   drawingEnabled: boolean
   reloadToken: number
-  panEnabled?: boolean
   onMeasured?: (pageNumber: number, width: number, height: number) => void
 }
 
@@ -25,7 +24,6 @@ export default function PdfPage({
   penWidth,
   drawingEnabled,
   reloadToken,
-  panEnabled = true,
   onMeasured,
 }: Props) {
   const pdfCanvasRef = useRef<HTMLCanvasElement>(null)
@@ -155,7 +153,7 @@ export default function PdfPage({
         className="absolute inset-0"
         style={{
           cursor: drawingEnabled ? 'crosshair' : 'default',
-          touchAction: drawingEnabled || !panEnabled ? 'none' : 'pan-x pan-y pinch-zoom',
+          touchAction: 'none',
         }}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}

@@ -33,7 +33,14 @@
       "Bash(grep -E '^score.jpg$|README')",
       "Bash(lsof -ti:5173,5174)",
       "Bash(git stash *)",
-      "Bash(xargs -r kill)"
+      "Bash(xargs -r kill)",
+      "Bash(curl -s \"https://api.github.com/repos/Kyuyong/jerry-score/actions/runs?per_page=5\")",
+      "Bash(curl -s \"https://kyuyong.github.io/jerry-score/\")",
+      "Bash(curl -s \"https://kyuyong.github.io/jerry-score/sw.js\")",
+      "Bash(curl -s \"https://kyuyong.github.io/jerry-score/\" -I)",
+      "Bash(curl -sI \"https://kyuyong.github.io/jerry-score/sw.js\")",
+      "Bash(curl -sI \"https://kyuyong.github.io/jerry-score/registerSW.js\")",
+      "Bash(curl -s \"https://kyuyong.github.io/jerry-score/registerSW.js\")"
     ]
   }
 }

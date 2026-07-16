@@ -138,6 +138,12 @@ export async function getAccessToken(): Promise<string> {
   return requestAccessTokenSilent()
 }
 
+/** 저장된 액세스 토큰만 무효화해요(로그인 이력은 유지) — 서버가 401로 거부한 토큰을 버리고 재발급받을 때 써요. */
+export function invalidateToken(): void {
+  inMemoryToken = undefined
+  localStorage.removeItem(TOKEN_STORAGE_KEY)
+}
+
 export function signOut(): void {
   const stored = readStoredToken()
   if (stored && window.google) {
