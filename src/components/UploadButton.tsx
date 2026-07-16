@@ -29,6 +29,12 @@ export default function UploadButton({ onUploaded }: Props) {
         addedAt: Date.now(),
         mimeType: uploaded.mimeType,
         size: uploaded.size,
+        fileName: file.name,
+        difficulty: 3,
+        tuning: 'Standard',
+        capo: 0,
+        status: 'new',
+        favorite: false,
       })
       onUploaded()
     } catch (err) {

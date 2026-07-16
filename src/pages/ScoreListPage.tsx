@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import Header from '../components/Header'
 import SearchBar from '../components/SearchBar'
 import TagFilter from '../components/TagFilter'
+import StatusFilter from '../components/StatusFilter'
 import ScoreGrid from '../components/ScoreGrid'
 import UploadButton from '../components/UploadButton'
 import EditScoreDialog from '../components/EditScoreDialog'
@@ -11,28 +12,39 @@ import VersionBadge from '../components/VersionBadge'
 import { useAuth } from '../contexts/AuthContext'
 import { useScores } from '../hooks/useScores'
 import { allTags } from '../lib/scoreStore'
-import type { ScoreMeta } from '../types'
+import type { ScoreMeta, ScoreStatus } from '../types'
 
 export default function ScoreListPage() {
   const { isReady, isSignedIn, initError, signIn } = useAuth()
   const { scores, loading, error, sync, remove, updateMeta } = useScores()
   const [query, setQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [selectedStatuses, setSelectedStatuses] = useState<ScoreStatus[]>([])
   const [editing, setEditing] = useState<ScoreMeta | null>(null)
   const [deleting, setDeleting] = useState<ScoreMeta | null>(null)
 
   const tags = useMemo(() => allTags(), [scores])
 
   const filtered = useMemo(() => {
-    return scores.filter((s) => {
+    const result = scores.filter((s) => {
       const matchesQuery = s.title.toLowerCase().includes(query.toLowerCase())
       const matchesTags = selectedTags.every((t) => s.tags.includes(t))
-      return matchesQuery && matchesTags
+      const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(s.status)
+      return matchesQuery && matchesTags && matchesStatus
     })
-  }, [scores, query, selectedTags])
+    return result.sort((a, b) => Number(b.favorite) - Number(a.favorite))
+  }, [scores, query, selectedTags, selectedStatuses])
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  }
+
+  const toggleStatus = (status: ScoreStatus) => {
+    setSelectedStatuses((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
+  }
+
+  const handleToggleFavorite = (score: ScoreMeta) => {
+    updateMeta(score.id, { favorite: !score.favorite })
   }
 
   const handleConfirmDelete = async () => {
@@ -107,11 +119,17 @@ export default function ScoreListPage() {
       <main className="mx-auto max-w-5xl px-4 pt-4">
         <div className="mb-4 flex flex-col gap-3">
           <SearchBar value={query} onChange={setQuery} />
+          <StatusFilter selected={selectedStatuses} onToggle={toggleStatus} />
           <TagFilter tags={tags} selected={selectedTags} onToggle={toggleTag} />
         </div>
         {loading && <p className="mb-2 text-sm text-dark/50">Drive와 동기화 중...</p>}
         {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
-        <ScoreGrid scores={filtered} onEdit={setEditing} onDelete={setDeleting} />
+        <ScoreGrid
+          scores={filtered}
+          onEdit={setEditing}
+          onDelete={setDeleting}
+          onToggleFavorite={handleToggleFavorite}
+        />
       </main>
       {editing && (
         <EditScoreDialog

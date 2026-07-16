@@ -22,14 +22,25 @@ export function useScores() {
 
       for (const file of files) {
         const prev = existing.find((s) => s.id === file.id)
-        upsertScore({
+        const base: ScoreMeta = prev ?? {
           id: file.id,
-          title: prev?.title ?? file.name.replace(/\.pdf$/i, ''),
-          tags: prev?.tags ?? [],
-          addedAt: prev?.addedAt ?? (Date.parse(file.createdTime ?? '') || Date.now()),
+          title: file.name.replace(/\.pdf$/i, ''),
+          tags: [],
+          addedAt: Date.parse(file.createdTime ?? '') || Date.now(),
+          mimeType: file.mimeType,
+          fileName: file.name,
+          difficulty: 3,
+          tuning: 'Standard',
+          capo: 0,
+          status: 'new',
+          favorite: false,
+        }
+        upsertScore({
+          ...base,
+          id: file.id,
           mimeType: file.mimeType,
           size: file.size,
-          pageCount: prev?.pageCount,
+          fileName: file.name,
         })
       }
       for (const score of existing) {
@@ -54,10 +65,13 @@ export function useScores() {
     setScores(getScores())
   }, [])
 
-  const updateMeta = useCallback((id: string, patch: Partial<Pick<ScoreMeta, 'title' | 'tags'>>) => {
-    updateScoreMeta(id, patch)
-    setScores(getScores())
-  }, [])
+  const updateMeta = useCallback(
+    (id: string, patch: Partial<Omit<ScoreMeta, 'id' | 'addedAt' | 'mimeType' | 'size' | 'pageCount' | 'fileName'>>) => {
+      updateScoreMeta(id, patch)
+      setScores(getScores())
+    },
+    [],
+  )
 
   const refresh = useCallback(() => setScores(getScores()), [])
 
