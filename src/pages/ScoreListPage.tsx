@@ -9,14 +9,12 @@ import UploadButton from '../components/UploadButton'
 import EditScoreDialog from '../components/EditScoreDialog'
 import DeleteConfirmDialog from '../components/DeleteConfirmDialog'
 import VersionBadge from '../components/VersionBadge'
-import { useAuth } from '../contexts/AuthContext'
 import { useScores } from '../hooks/useScores'
 import { allTags } from '../lib/scoreStore'
 import type { ScoreMeta, ScoreStatus } from '../types'
 
 export default function ScoreListPage() {
-  const { isReady, isSignedIn, initError, signIn } = useAuth()
-  const { scores, loading, error, sync, remove, updateMeta } = useScores()
+  const { scores, remove, updateMeta, refresh } = useScores()
   const [query, setQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [selectedStatuses, setSelectedStatuses] = useState<ScoreStatus[]>([])
@@ -58,39 +56,6 @@ export default function ScoreListPage() {
     }
   }
 
-  if (!isReady) {
-    return <div className="flex h-screen items-center justify-center text-dark/50">불러오는 중...</div>
-  }
-
-  if (initError) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center gap-2 bg-light px-6 text-center">
-        <p className="font-medium text-red-600">설정 오류</p>
-        <p className="text-sm text-dark/60">{initError}</p>
-      </div>
-    )
-  }
-
-  if (!isSignedIn) {
-    return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4 bg-light px-6 text-center">
-        <img
-          src={`${import.meta.env.BASE_URL}score.jpg`}
-          alt="Jerry Score"
-          className="h-24 w-24 rounded-2xl object-cover shadow"
-        />
-        <div className="flex items-center gap-2">
-          <h1 className="font-serif text-xl font-semibold text-dark">Jerry Score</h1>
-          <VersionBadge />
-        </div>
-        <p className="text-sm text-dark/60">Google 계정으로 로그인해서 악보를 관리해보세요.</p>
-        <button onClick={() => void signIn()} className="rounded-full bg-primary px-6 py-2 font-medium text-white shadow-sm">
-          Google 계정으로 로그인
-        </button>
-      </div>
-    )
-  }
-
   return (
     <div className="min-h-screen bg-light pb-8">
       <Header
@@ -99,7 +64,7 @@ export default function ScoreListPage() {
         titleBadge={<VersionBadge />}
         right={
           <>
-            <UploadButton onUploaded={() => void sync()} />
+            <UploadButton onUploaded={refresh} />
             <Link
               to="/settings"
               className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 hover:bg-white/20"
@@ -122,8 +87,6 @@ export default function ScoreListPage() {
           <StatusFilter selected={selectedStatuses} onToggle={toggleStatus} />
           <TagFilter tags={tags} selected={selectedTags} onToggle={toggleTag} />
         </div>
-        {loading && <p className="mb-2 text-sm text-dark/50">Drive와 동기화 중...</p>}
-        {error && <p className="mb-2 text-sm text-red-600">{error}</p>}
         <ScoreGrid
           scores={filtered}
           onEdit={setEditing}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { PDFDocumentProxy } from 'pdfjs-dist'
 import { pdfjsLib } from '../lib/pdf'
-import { downloadFileBlob } from '../lib/googleDrive'
+import { getFile } from '../lib/fileStore'
 
 export function usePdfDocument(scoreId: string | undefined) {
   const [pdfDoc, setPdfDoc] = useState<PDFDocumentProxy | null>(null)
@@ -18,7 +18,8 @@ export function usePdfDocument(scoreId: string | undefined) {
 
     void (async () => {
       try {
-        const blob = await downloadFileBlob(scoreId)
+        const blob = await getFile(scoreId)
+        if (!blob) throw new Error('저장된 파일을 찾을 수 없어요.')
         const buffer = await blob.arrayBuffer()
         if (cancelled) return
         doc = await pdfjsLib.getDocument({ data: buffer }).promise

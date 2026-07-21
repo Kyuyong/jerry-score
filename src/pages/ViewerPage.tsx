@@ -6,6 +6,7 @@ import ViewerToolbar from '../components/ViewerToolbar'
 import PdfPage from '../components/PdfPage'
 import PageThumbnails from '../components/PageThumbnails'
 import { usePdfDocument } from '../hooks/usePdfDocument'
+import { useWakeLock } from '../hooks/useWakeLock'
 import { getScores, updateScorePageCount } from '../lib/scoreStore'
 import { clearPageStrokes } from '../lib/annotationDb'
 
@@ -30,6 +31,7 @@ export default function ViewerPage() {
   const { scoreId } = useParams<{ scoreId: string }>()
   const navigate = useNavigate()
   const { pdfDoc, loading, error } = usePdfDocument(scoreId)
+  useWakeLock(Boolean(pdfDoc))
   const [page, setPage] = useState(1)
   const [scale, setScale] = useState(DEFAULT_SCALE)
   const [drawingEnabled, setDrawingEnabled] = useState(false)
